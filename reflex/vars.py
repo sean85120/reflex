@@ -8,6 +8,7 @@ import random
 import string
 from abc import ABC
 from types import FunctionType
+from typing import _GenericAlias  # type: ignore
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -19,7 +20,6 @@ from typing import (
     Tuple,
     Type,
     Union,
-    _GenericAlias,  # type: ignore
     cast,
     get_type_hints,
 )
@@ -1233,6 +1233,29 @@ class ReflexSet(set):
         """
         super().update(*args, **kwargs)
         self._reassign_field()
+
+
+class ReflexTuple(Tuple):
+    """A custom tuple that reflex can detect its mutation."""
+
+    def __init__(
+        self,
+        original_tuple: Tuple,
+        reassign_field: Callable = lambda _field_name: None,
+        field_name: str = "",
+    ):
+        """Initialize ReflexSet.
+
+        Args:
+            original_tuple (Set): The original tuple
+            reassign_field (Callable):
+                The method in the parent state to reassign the field.
+                Default to be a no-op function
+            field_name (str): the name of field in the parent state
+        """
+        self._reassign_field = lambda: reassign_field(field_name)
+
+        super().__init__(original_tuple)
 
 
 class ImportVar(Base):
